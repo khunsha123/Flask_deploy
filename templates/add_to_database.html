@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add to Database</title>
+    <style>
+        body {
+            padding-top: 50px; /* Add padding to top */
+            position: relative; /* Set position for watermark */
+        }
+
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 10px;
+            color: rgba(0, 0, 0, 0.7); /* Set watermark text color and opacity */
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block; /* Make the watermark an inline block */
+            padding-right: 10px; /* Add padding to the right for spacing */
+            border-right: 2px solid #ccc; /* Add a vertical line */
+            margin-right: 10px; /* Add margin to the right of the line */
+            height: 100vh; /* Set height to 100% of viewport height */
+            overflow: hidden; /* Hide overflow to prevent scrollbar */
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-container .btn {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-container .btn:hover {
+            background-color: #0056b3;
+        }
+
+        #video-container {
+            display: none; /* Hide video container initially */
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 1000; /* Ensure video container is above other elements */
+        }
+
+        #video-container video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #image-count {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #name-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001; /* Ensure name container is above video container */
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow for visual effect */
+            display: none; /* Hide name container initially */
+        }
+
+        #name-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #name-container button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #name-container button:hover {
+            background-color: #0056b3;
+        }
+
+        #capture-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 1000; /* Ensure image preview is above other elements */
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            grid-template-rows: repeat(3, 1fr); /* Three rows */
+            gap: 10px; /* Gap between grid items */
+            max-width: 800px; /* Max width for the grid */
+            margin: 0 auto; /* Center the grid */
+            height: 500px; /* Set a fixed height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .image-preview-grid img {
+            max-width: 100%; /* Max width for images */
+            max-height: 100%; /* Max height for images */
+            border-radius: 3px; /* Rounded corners for images */
+        }
+
+        #username-input {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        #add-to-db-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #add-to-db-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="watermark">BRAINALYST</div> <!-- Watermark -->
+    <h2 style="text-align: center;">Add to Database</h2>
+    <div id="name-container">
+        <input type="text" id="user-name" placeholder="Enter your name">
+        <button type="button" onclick="startCapture()">Start Capture</button>
+    </div>
+    <div class="btn-container">
+        <div class="col-md-6">
+            <button type="button" class="btn" onclick="showNameContainer()">Capture Photos</button>
+        </div>
+        <div class="col-md-6">
+            <!-- New form for uploading pictures -->
+            <form id="upload-form" action="/upload_photos" method="POST" enctype="multipart/form-data">
+                <input type="file" name="photos[]" id="photo-input" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)" max="3">
+                <button type="button" class="btn" onclick="document.getElementById('photo-input').click()">Upload Picture</button>
+            </form>
+            <!-- End of new form -->
+        </div>
+    </div>
+    <div id="name-container">
+        <input type="text" id="username-btn2" placeholder="Enter username">
+        <button type="button" id="add-to-db-btn2" class="add-to-dt-btn" style="display: none;">Add to Database</button>
+    </div>
+    <div id="video-container">
+        <div id="capture-title"></div>
+        <video id="camera-preview" autoplay></video>
+        <button type="button" id="capture-btn" onclick="capturePhoto()">Click Picture</button>
+        <button type="button" id="preview-btn" onclick="showPreview()" disabled>Preview Images</button> <!-- Preview Images button -->
+        <div id="image-count">Total Images: 0</div>
+    </div>
+    <div class="image-preview" id="image-preview-container">
+        <div class="image-preview-grid" id="image-preview-grid"></div>
+        <form id="add-to-db-form" method="POST">
+            <input type="text" name="username" id="username-input" readonly>
+            <button type="submit" id="add-to-db-btn">Add to Database</button>
+        </form>
+    </div>
+    
+    <script>
+        function handleFileSelect(event) {
+            const files = event.target.files; // Get the selected files
+            const previewContainer = document.querySelector('.image-preview');
+            const previewGrid = document.getElementById('image-preview-grid');
+            previewGrid.innerHTML = ''; // Clear previous images
+        
+            if (files.length < 3) {
+                alert('Please select at least 3 images.');
+                return;
+            }
+        
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+        
+                reader.onload = function (e) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = e.target.result;
+                    imgElement.alt = file.name;
+                    imgElement.title = file.name;
+                    previewGrid.appendChild(imgElement);
+                };
+        
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        
+            previewContainer.style.display = 'flex';
+            document.getElementById('photo-input').disabled = true;
+        
+            // Hide the "Capture Photos" button
+            document.querySelector('.btn-container .btn').style.display = 'none';
+            document.querySelector('.watermark').style.display = 'none';
+            document.querySelector('h2').style.display = 'none';
+            document.querySelector('.btn-container').style.display = 'none';
+            document.querySelector('.btn-container').style.display = 'none';
+            document.querySelector('h2').style.display = 'none';
+            document.querySelector('.btn-container').style.display = 'none';
+            document.getElementById('add-to-db-btn').style.display = 'none'; // Hide the "Add to Database" button
+            document.getElementById('username-input').style.display = 'none'; // Hide the input field
+        }
+        
+        
+        
+        
+        
+        let usernameInput = document.getElementById('username-input');
+        let photoCount = 0;
+        let userImages = []; // Array to store user images
+        let username = ''; // Global variable to store the username
+
+        function showNameContainer() {
+            document.getElementById('name-container').style.display = 'block';
+        }
+
+        document.getElementById('add-to-db-btn').addEventListener('click', addToDatabase);
+        
+        // Function to validate and set the username
+        function setUsername() {
+            const enteredUsername = document.getElementById('user-name').value.trim();
+            if (enteredUsername === '') {
+                alert('Please enter your username.');
+                return false;
+            }
+
+            if (username !== '' && enteredUsername !== username) {
+                alert('Username does not match the previous entry. Please re-enter your username.');
+                return false;
+            }
+
+            username = enteredUsername; // Set the username
+            document.getElementById('user-name').value = ''; // Clear the input field
+            return true;
+        }
+
+        function addToDatabase(event) {
+            event.preventDefault(); // Prevent form from submitting the traditional way
+            const formData = new FormData();
+            formData.append('username', username);
+
+            userImages.forEach((image, index) => {
+                const blob = dataURItoBlob(image);
+                formData.append(`image_${index + 1}`, blob, `${username}_${index + 1}.jpg`);
+            });
+
+            fetch('/upload_photos', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Upload response:', data); // Debug log
+                    if (data.success) {
+                        alert('Images are successfully added to the database.');
+                        location.reload();
+                    } else {
+                        alert('Failed to upload images.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading images:', error); // Debug log
+                    alert('Failed to upload images.');
+                });
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+
+        function startCapture() {
+            if (!setUsername()) {
+                return; // Exit if username validation fails
+            }
+        
+            document.getElementById('name-container').style.display = 'none';
+            document.getElementById('video-container').style.display = 'flex';
+            document.getElementById('capture-title').innerText = `${username}, please start capturing photos`;
+            usernameInput.value = username; // Set the username in the hidden input field
+        
+            // Check camera permission
+            navigator.permissions.query({ name: 'camera' })
+                .then(permissionStatus => {
+                    if (permissionStatus.state === 'granted') {
+                        // Camera permission already granted, start video capture
+                        startVideoCapture();
+                    } else if (permissionStatus.state === 'prompt') {
+                        // Camera permission not yet granted, request permission
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(stream => {
+                                // Permission granted, start video capture
+                                startVideoCapture();
+                            })
+                            .catch(error => {
+                                console.error('Error accessing camera:', error); // Log the error
+                                alert('Failed to access the camera. Please allow camera access to capture photos.');
+                            });
+                    } else {
+                        // Camera permission denied or unavailable
+                        alert('Camera access is denied or unavailable.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking camera permission:', error); // Log the error
+                    alert('Failed to check camera permission.');
+                });
+        }
+        
+        function startVideoCapture() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    const videoElement = document.getElementById('camera-preview');
+                    videoElement.srcObject = stream;
+                    videoElement.play(); // Ensure video playback starts
+                })
+                .catch(error => {
+                    console.error('Error accessing camera:', error); // Log the error
+                    alert('Failed to access the camera. Please allow camera access to capture photos.');
+                });
+        }
+        
+
+        function capturePhoto() {
+            const videoElement = document.getElementById('camera-preview');
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+            userImages.push(imageData);
+
+            const imageCount = document.getElementById('image-count');
+            imageCount.innerText = `Total Images: ${userImages.length}`;
+
+            if (userImages.length === 6) {
+                document.getElementById('preview-btn').disabled = false;
+                document.getElementById('capture-btn').disabled = true;
+            }
+
+            console.log('Captured photo:', imageData); // Debug log
+        }
+        
+        function showPreview() {
+            const previewContainer = document.getElementById('image-preview-container');
+            const previewGrid = document.getElementById('image-preview-grid');
+            previewGrid.innerHTML = ''; // Clear previous images
+
+            userImages.forEach((image, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image;
+                imgElement.alt = `${username}_${index + 1}`;
+                imgElement.title = `${username}_${index + 1}`;
+                previewGrid.appendChild(imgElement);
+            });
+
+            previewContainer.style.display = 'flex';
+            
+        }
+    </script>
+</body>
+
+</html>

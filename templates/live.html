@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            display: flex;
+            max-width: 800px; /* Increased width to accommodate sidebar */
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            flex: 1;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .sidebar img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .about-text {
+            font-style: italic;
+        }
+
+        .content {
+            flex: 2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        li a {
+            display: block;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        li a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <a href="https://www.linkedin.com/company/brainalyst/">
+                <img src="https://brainalyst.in/wp-content/uploads/2022/07/b1.jpg" alt="BRAINALYST Logo">
+            </a>
+            <h2>About</h2>
+            <p class="about-text">This webapp does Face Detection and Recognition</p>
+            <p>Made by <a href="https://www.linkedin.com/company/brainalyst/">BRAINALYST</a></p>
+        </div>
+        <div class="content">
+            <h1>Live Stream Recognition</h1>
+            <img id="live-stream" src="{{ url_for('video_feed') }}" style="width: 100%; height: auto;">
+        </div>
+    </div>
+    
+    <script>
+        // Get the live stream from webcam and display
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                var video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                document.getElementById('live-stream').appendChild(video);
+            })
+            .catch(function(err) {
+                console.error('Error accessing webcam: ', err);
+            });
+
+        // Handle page unload event to close camera and destroy OpenCV window
+        window.addEventListener('unload', function() {
+            // Make AJAX request to close camera
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/close_camera', true);
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
+

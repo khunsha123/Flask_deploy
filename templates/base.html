@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection and Recognition App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            display: flex;
+            max-width: 800px; /* Increased width to accommodate sidebar */
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            flex: 1;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .sidebar img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .about-text {
+            font-style: italic;
+        }
+
+        .content {
+            flex: 2;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        li a {
+            display: block;
+            padding: 15px;
+            background-color: black; /* Changed background color to black */
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        li a:hover {
+            background-color: #333; /* Darkening the hover color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <a href="https://www.linkedin.com/company/brainalyst/">
+                <img src="https://brainalyst.in/wp-content/uploads/2022/07/b1.jpg" alt="BRAINALYST Logo">
+            </a>
+            <h2>About</h2>
+            <p class="about-text">This webapp does Face Detection and Recognition</p>
+            <p>Made by <a href="https://www.linkedin.com/company/brainalyst/">BRAINALYST</a></p>
+        </div>
+        <div class="content">
+            <h1>Face Detection and Recognition App</h1>
+            <ul>
+                <li><a href="{{ url_for('picture_recognition') }}">Picture Recognition</a></li>
+                <li><a href="{{ url_for('live_stream_recognition') }}">Live Stream Recognition</a></li>
+                <li><a href="{{ url_for('video_recognition') }}">Video Recognition</a></li>
+                <li><a href="{{ url_for('add_to_database') }}">Add to Database</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+ 

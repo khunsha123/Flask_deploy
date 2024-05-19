@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picture Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Center the container */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Adjust as needed */
+        }
+        
+        /* Style the image */
+        .container img {
+            max-width: 80%; /* Adjust as needed */
+            max-height: 80%; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Display the recognized image -->
+        {% if img_data %}
+        <img src="data:image/jpeg;base64,{{ img_data }}" alt="Recognized Image">
+        {% endif %}
+    </div>
+</body>
+</html>
