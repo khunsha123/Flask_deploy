@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, Response, redirect, url_for
 import base64
 import cv2
+from flask import jsonify
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Conv2D, ZeroPadding2D, Activation, Input, concatenate
@@ -117,16 +118,70 @@ def video_2_feed():
     video_path = "uploads/video.mp4"
     return Response(gen_frames_video(video_path), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# @app.route('/add_to_database')
-# def add_to_database():
-#     # Handle add to database logic here 
-#     return "Add to Database"
+@app.route('/create_folder', methods=['POST'])
+def create_folder():
+    data = request.get_json()
+    folder_name = data.get('folderName')
+    if folder_name:
+        folder_path = os.path.join(app.config['UPLOAD_FOLDER'], folder_name)
+        try:
+            os.makedirs(folder_path, exist_ok=True)
+            return jsonify({'message': f'Folder "{folder_name}" created successfully!'})
+        except OSError as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Folder name is required'}), 400
+@app.route('/upload_images', methods=['POST'])
+def upload_images():
+    if 'username' not in request.form:
+        return jsonify({'error': 'No username provided'}), 400
 
-userImages=[];
+    if 'images' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    username = request.form.get('username')
+    files = request.files.getlist('images')
+    folder_path = os.path.join(app.config['UPLOAD_FOLDER'], username)
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+
+    for idx, file in enumerate(files, start=1):
+        if file and allowed_file(file.filename):
+            filename = f'{username}_{idx:03}.{file.filename.rsplit(".", 1)[1].lower()}'
+            file_path = os.path.join(folder_path, filename)
+            file.save(file_path)
+        else:
+            return jsonify({'error': 'Invalid file type'}), 400
+
+    return jsonify({'success': 'Images successfully uploaded'})
+@app.route('/upload', methods=['POST'])
+def upload():
+    username = request.form['username']
+
+    # Create a folder for the user if it doesn't exist
+    user_folder = os.path.join('Database', 'Data', username)
+    if not os.path.exists(user_folder):
+        os.makedirs(user_folder)
+
+    # Save uploaded files to the user's folder with username_001, username_002, etc. naming convention
+    for i in range(1, 4):  # Assuming you have 3 image uploads
+        file_key = f'image{i}'
+        if file_key in request.files:
+            file = request.files[file_key]
+            if file.filename != '':
+                # Generate the filename with the desired format
+                filename = f"{username}_{str(i).zfill(3)}{os.path.splitext(file.filename)[1]}"
+                file.save(os.path.join(user_folder, filename))
+
+    # Return a response with the uploaded file paths
+    uploaded_images = [os.path.join(user_folder, f'{username}_{str(i).zfill(3)}') for i in range(1, 4)]
+    return jsonify({'images': uploaded_images})
+
 @app.route('/upload_photos', methods=['POST'])
 def upload_photos():
     username = request.form.get('username')
-    data_folder = os.path.join('Database_01', 'Data', username)
+    data_folder = os.path.join('Database', 'Data', username)
     
     if not os.path.exists(data_folder):
         os.makedirs(data_folder)
@@ -142,7 +197,11 @@ def upload_photos():
     except Exception as e:
         print(f'Error saving images: {e}')
         return jsonify(success=False, error=str(e))
+    
+
+userImages=[];
 @app.route('/add_to_database', methods=['POST','GET'])
+
 def add_to_database():
     if request.method == 'POST':
         # Get the username from the form data
@@ -166,6 +225,12 @@ def add_to_database():
 
     # Handle GET request or other cases
     return render_template('add_to_database.html')
+
+# New route for adding images to the database
+@app.route('/add_images_to_database', methods=['GET', 'POST'])
+def add_images_to_database():
+    return render_template('add_images_to_database.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
