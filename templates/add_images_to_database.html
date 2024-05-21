@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Uploader</title>
+    <style>
+        body {
+            padding-top: 50px;
+            position: relative;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 10px;
+            color: rgba(0, 0, 0, 0.7);
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block;
+            padding-right: 10px;
+            border-right: 2px solid #ccc;
+            margin-right: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn-container .btn {
+            margin: 0 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-container .btn:hover {
+            background-color: #0056b3;
+        }
+        #nameInput, #imageUpload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #nameInput label {
+            margin: 5px;
+            font-weight: bold;
+        }
+        #nameInput input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        #nameInput button {
+            padding: 12px 24px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        #nameInput button:hover {
+            background-color: #45a049;
+        }
+        #imageUpload input {
+            margin: 5px;
+        }
+        #imagePreview {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        #imagePreview img {
+            max-width: 100px;
+            margin: 10px;
+        }
+        .custom-file-upload {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease;
+        }
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">Brainalyst</div>
+    <h1>Please Upload Images</h1>
+    <div class="btn-container">
+        <button class="btn" id="proceedToDatabase">Proceed to add to database</button>
+    </div>
+    <div id="nameInput" style="display: none;">
+        <label for="username">Please enter your name:</label>
+        <input type="text" id="username" name="username">
+        <button class="btn" id="confirmName">Confirm</button>
+    </div>
+    <div id="imageUpload" style="display: none;">
+        <input type="file" id="image1" name="image1" accept="image/*,.jpeg,.jpg,.png,.tiff" style="display: none;">
+        <label for="image1" class="custom-file-upload btn">Choose File</label>
+        
+        <input type="file" id="image2" name="image2" accept="image/*,.jpeg,.jpg,.png,.tiff" style="display: none;">
+        <label for="image2" class="custom-file-upload btn">Choose File</label>
+        
+        <input type="file" id="image3" name="image3" accept="image/*,.jpeg,.jpg,.png,.tiff" style="display: none;">
+        <label for="image3" class="custom-file-upload btn">Choose File</label>
+
+        <button class="btn" id="uploadImages" style="margin-top: 20px; padding: 12px 24px; border-radius: 5px; background-color: #4CAF50; color: #fff; border: none; cursor: pointer; font-size: 18px; transition: background-color 0.3s ease;">Upload Images</button>
+    </div>
+    <div id="imagePreview"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#proceedToDatabase").click(function() {
+                $("#nameInput").show();
+                $("#proceedToDatabase").hide();
+            });
+
+            $("#confirmName").click(function() {
+                var username = $("#username").val();
+                $("#nameInput").hide();
+                $("#imageUpload").show();
+            });
+
+            // Image preview function
+            function previewImage(input) {
+                if (input.files && input.files.length > 0) {
+                    var previewContainer = $("#imagePreview");
+                    previewContainer.empty(); // Clear previous previews
+
+                    for (var i = 0; i < input.files.length; i++) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var img = $("<img>").attr("src", e.target.result);
+                            previewContainer.append(img);
+                        }
+                        reader.readAsDataURL(input.files[i]);
+                    }
+                }
+            }
+
+            // Preview images on file selection
+            $("#image1").change(function() {
+                previewImage(this);
+            });
+            $("#image2").change(function() {
+                previewImage(this);
+            });
+            $("#image3").change(function() {
+                previewImage(this);
+            });
+
+            $("#uploadImages").click(function() {
+                var formData = new FormData();
+                formData.append("username", $("#username").val());
+                formData.append("image1", $("#image1")[0].files[0]);
+                formData.append("image2", $("#image2")[0].files[0]);
+                formData.append("image3", $("#image3")[0].files[0]);
+
+                // Check if any file inputs are empty
+                if ($("#image1")[0].files.length === 0 || $("#image2")[0].files.length === 0 || $("#image3")[0].files.length === 0) {
+                    alert("Please select all three images before uploading.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/upload",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        // Reset the form
+                        $("#username").val("");
+                        $("#image1").val("");
+                        $("#image2").val("");
+                        $("#image3").val("");
+
+                        // Clear the image preview
+                        $("#imagePreview").empty();
+
+                        // Hide the image upload section
+                        $("#imageUpload").hide();
+
+                        // Show the proceed button again
+                        $("#proceedToDatabase").show();
+
+                        // Show alert
+                        alert("Images saved to database");
+                   
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
