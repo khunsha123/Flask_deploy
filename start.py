@@ -118,6 +118,25 @@ def video_2_feed():
     video_path = "uploads/video.mp4"
     return Response(gen_frames_video(video_path), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+def save_images(username, image_files):
+    data_folder = os.path.join('Database', 'Data', username)
+    if not os.path.exists(data_folder):
+        os.makedirs(data_folder)
+
+    try:
+        for idx, image_file in enumerate(image_files, start=1):
+            image_path = os.path.join(data_folder, f'{username}_{idx:03}.jpg')
+            image_file.save(image_path)
+        
+        return True, None  # Success, no error message
+    except Exception as e:
+        error_msg = f'Error saving images: {e}'
+        return False, error_msg
+app.config['UPLOAD_FOLDER'] = 'Database/Data'
+def allowed_file(filename):
+    allowed_extensions = {'jpeg', 'jpg', 'tiff', 'png'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
 @app.route('/create_folder', methods=['POST'])
 def create_folder():
     data = request.get_json()
@@ -231,6 +250,12 @@ def add_to_database():
 def add_images_to_database():
     return render_template('add_images_to_database.html')
 
+@app.route('/train_model', methods=['GET', 'POST'])
+def train_model():
+    global face_dict
+    generate_database('Database/Data', FRmodel, augmentations=3, output_name='friends.npy')   
+    face_dict = np.load('friends.npy', allow_pickle=True).item()
+    return render_template('success.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
