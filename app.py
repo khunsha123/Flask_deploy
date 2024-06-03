@@ -16,7 +16,6 @@ from keras import backend as K
 K.set_image_data_format('channels_first')
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 
-
 from facerecog_utils import *
 from inception_blocks import *
 from database_utils import *
